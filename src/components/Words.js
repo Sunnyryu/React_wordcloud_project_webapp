@@ -14,6 +14,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
+import '../index.css';
 
 const styles = theme => ({
     fab: {
@@ -38,13 +39,11 @@ class Words extends React.Component {
 
     _get() {
         fetch(`${databaseURL}/words.json`).then(res => {
-            if (res.status != 200) {
+            if(res.status != 200) {
                 throw new Error(res.statusText);
             }
             return res.json();
-        }).then(words => this.setState({
-            words: words
-        }));
+        }).then(words => this.setState({words: words}));
     }
 
     _post(word) {
@@ -52,16 +51,14 @@ class Words extends React.Component {
             method: 'POST',
             body: JSON.stringify(word)
         }).then(res => {
-            if (res.status != 200) {
+            if(res.status != 200) {
                 throw new Error(res.statusText);
             }
             return res.json();
         }).then(data => {
             let nextState = this.state.words;
             nextState[data.name] = word;
-            this.setState({
-                words: nextState
-            });
+            this.setState({words: nextState});
         });
     }
 
@@ -69,16 +66,14 @@ class Words extends React.Component {
         return fetch(`${databaseURL}/words/${id}.json`, {
             method: 'DELETE'
         }).then(res => {
-            if (res.status != 200) {
+            if(res.status != 200) {
                 throw new Error(res.statusText);
             }
             return res.json();
         }).then(() => {
             let nextState = this.state.words;
             delete nextState[id];
-            this.setState({
-                words: nextState
-            });
+            this.setState({words: nextState});
         });
     }
 
@@ -94,6 +89,12 @@ class Words extends React.Component {
         let nextState = {};
         nextState[e.target.name] = e.target.value;
         this.setState(nextState);
+        if(e.target.value < 1) {
+            this.setState({weight: 1});
+        }
+        else if(e.target.value > 9) {
+            this.setState({weight: 9});
+        }
     }
 
     handleSubmit = () => {
@@ -113,118 +114,49 @@ class Words extends React.Component {
     }
 
     render() {
-        const {
-            classes
-        } = this.props;
-        return ( <
-            div > {
-                Object.keys(this.state.words).map(id => {
+        const { classes } = this.props;
+        return (
+            <div>
+                {Object.keys(this.state.words).map(id => {
                     const word = this.state.words[id];
-                    return ( <
-                        div key = {
-                            id
-                        } >
-                        <
-                        Card >
-                        <
-                        CardContent >
-                        <
-                        Typography color = "textSecondary"
-                        gutterBottom >
-                        가중치: {
-                            word.weight
-                        } <
-                        /Typography> <
-                        Grid container >
-                        <
-                        Grid item xs = {
-                            6
-                        } >
-                        <
-                        Typography variant = "h5"
-                        component = "h2" > {
-                            word.word
-                        } <
-                        /Typography> <
-                        /Grid> <
-                        Grid item xs = {
-                            6
-                        } >
-                        <
-                        Button variant = "contained"
-                        color = "primary"
-                        onClick = {
-                            () => this.handleDelete(id)
-                        } > 삭제 < /Button> <
-                        /Grid> <
-                        /Grid> <
-                        /CardContent> <
-                        /Card> <
-                        br / >
-                        <
-                        /div>
+                    return (
+                        <div key={id}>
+                            <Card>
+                                <CardContent>
+                                    <Typography color="textSecondary" gutterBottom>
+                                        가중치: {word.weight}
+                                    </Typography>
+                                    <Grid container>
+                                        <Grid item xs={6}>
+                                            <Typography variant="h5" component="h2">
+                                                {word.word}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Button variant="contained" color="primary" onClick={() => this.handleDelete(id)}>삭제</Button>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </Card>
+                            <br />
+                        </div>
                     );
-                })
-            } <
-            Fab color = "primary"
-            className = {
-                classes.fab
-            }
-            onClick = {
-                this.handleDialogToggle
-            } >
-            <
-            AddIcon / >
-            <
-            /Fab> <
-            Dialog open = {
-                this.state.dialog
-            }
-            onClose = {
-                this.handleDialogToggle
-            } >
-            <
-            DialogTitle > 단어 추가 < /DialogTitle> <
-            DialogContent >
-            <
-            TextField label = "단어"
-            type = "text"
-            name = "word"
-            value = {
-                this.state.word
-            }
-            onChange = {
-                this.handleValueChange
-            }
-            /><br/ >
-            <
-            TextField label = "가중치"
-            type = "number"
-            name = "weight"
-            value = {
-                this.state.weight
-            }
-            onChange = {
-                this.handleValueChange
-            }
-            /><br/ >
-            <
-            /DialogContent> <
-            DialogActions >
-            <
-            Button variant = "contained"
-            color = "primary"
-            onClick = {
-                this.handleSubmit
-            } > 추가 < /Button> <
-            Button variant = "outlined"
-            color = "primary"
-            onClick = {
-                this.handleDialogToggle
-            } > 닫기 < /Button> <
-            /DialogActions> <
-            /Dialog> <
-            /div>
+                })}
+                <Fab color="primary" className={classes.fab} onClick={this.handleDialogToggle}>
+                    <AddIcon />
+                </Fab>
+                <Dialog open={this.state.dialog} onClose={this.handleDialogToggle}>
+                    <DialogTitle>단어 추가</DialogTitle>
+                    <DialogContent>
+                        <TextField label="단어" type="text" name="word" value={this.state.word} onChange={this.handleValueChange}/><br/>
+                        <TextField label="가중치(1부터 9까지)" type="number" name="weight" value={this.state.weight} onChange={this.handleValueChange}/><br/>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" color="primary" onClick={this.handleSubmit}>추가</Button>
+                        <Button variant="outlined" color="primary" onClick={this.handleDialogToggle}>닫기</Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
         );
     }
 }
